@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>大学生月度消费记账本</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #bbdefb);
+            color: #333;
+            min-height: 100vh;
+            padding: 15px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid #1565c0;
+        }
+        
+        h1 {
+            color: #1565c0;
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+        
+        .subtitle {
+            color: #5c6bc0;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .budget-card {
+            background: linear-gradient(135deg, #1e88e5, #0d47a1);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 6px 15px rgba(13, 71, 161, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .budget-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            color: #0d47a1;
+        }
+        
+        .card-title i {
+            margin-right: 8px;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.3);
+            height: 22px;
+            border-radius: 11px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #ffeb3b;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+            transition: width 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .amounts {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .category {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f5f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #1e88e5;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .category:active {
+            transform: translateY(-3px);
+            background: #e3f2fd;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            color: #1565c0;
+            font-size: 0.95rem;
+        }
+        
+        .category-amount {
+            font-weight: bold;
+            color: #1e88e5;
+            font-size: 1rem;
+        }
+        
+        .category-progress {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        
+        .category-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #42a5f5, #64b5f6);
+            border-radius: 4px;
+            transition: width 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .category-budget {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .transaction-form, .transaction-list {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+        }
+        
+        .form-title, .list-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #0d47a1;
+            display: flex;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e3f2fd;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+        
+        .number-tip {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+            background: #e3f2fd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .number-tip i {
+            margin-right: 5px;
+            color: #1e88e5;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #1e88e5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.15);
+        }
+        
+        button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
+        }
+        
+        button:active {
+            background: #1565c0;
+            transform: scale(0.98);
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-details {
+            flex: 1;
+        }
+        
+        .transaction-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+        
+        .transaction-category {
+            font-size: 0.8rem;
+            color: #555;
+            background: #e3f2fd;
+            padding: 4px 10px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: 500;
+        }
+        
+        .transaction-date {
+            font-size: 0.8rem;
+            color: #777;
+            margin-left: 8px;
+        }
+        
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+        
+        .expense {
+            color: #e53935;
+        }
+        
+        .income {
+            color: #43a047;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #e53935;
+            cursor: pointer;
+            width: auto;
+            padding: 6px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:active {
+            color: #b71c1c;
+            background: rgba(229, 57, 53, 0.1);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #555;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+        }
+        
+        .budget-warning {
+            color: #e53935;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+            text-align: center;
+            padding: 4px;
+            border-radius: 4px;
+            background: rgba(229, 57, 53, 0.1);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .storage-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .clear-btn {
+            background: #e53935;
+            box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3);
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+            font-style: italic;
+            font-size: 1rem;
+        }
+        
+        .budget-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.25);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .budget-status {
+            font-weight: bold;
+        }
+        
+        .safe {
+            color: #4caf50;
+        }
+        
+        .warning {
+            color: #ff9800;
+        }
+        
+        .danger {
+            color: #f44336;
+        }
+        
+        .mobile-tabs {
+            display: flex;
+            justify-content: space-around;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #555;
+            transition: all 0.3s;
+        }
+        
+        .tab-item.active {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .tab-item i {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background: #43a047;
+        }
+        
+        .notification.error {
+            background: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-money-check-alt"></i> 大学生记账本</h1>
+            <p class="subtitle">900元预算 • 轻松管理校园开支</p>
+        </header>
+        
+        <div class="dashboard section active" id="dashboard-section">
+            <div class="budget-card">
+                <h2><i class="fas fa-wallet"></i> 月度预算总览</h2>
+                <div class="progress-container">
+                    <div class="progress-bar" id="budget-progress" style="width: 0%;">¥0 / ¥900</div>
+                </div>
+                <div class="amounts">
+                    <div>已消费: <span id="spent-amount">¥0</span></div>
+                    <div>剩余: <span id="remaining-amount">¥900</span></div>
+                </div>
+                <div class="budget-summary">
+                    <div>状态: <span id="budget-status" class="budget-status safe">良好</span></div>
+                    <div>天数: <span id="days-passed">1/30</span></div>
+                </div>
+            </div>
+            
+            <div class="category-card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> 消费分类统计</div>
+                <div class="categories-grid">
+                    <div class="category" id="food-category">
+                        <div class="category-header">
+                            <span class="category-name">餐饮伙食</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥450</span>
+                            <span>剩余: ¥450</span>
+                        </div>
+                        <div class="budget-warning" id="food-warning">已超出预算！</div>
+                    </div>
+                    
+                    <div class="category" id="transport-category">
+                        <div class="category-header">
+                            <span class="category-name">交通出行</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥100</span>
+                            <span>剩余: ¥100</span>
+                        </div>
+                        <div class="budget-warning" id="transport-warning">已超出预算！</div>
+                    </div>
+                    
+                    <div class="category" id="study-category">
+                        <div class="category-header">
+                            <span class="category-name">学习用品</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥100</span>
+                            <span>剩余: ¥100</span>
+                        </div>
+                        <div class="budget-warning" id="study-warning">已超出预算！</div>
+                    </div>
+                    
+                    <div class="category" id="daily-category">
+                        <div class="category-header">
+                            <span class="category-name">生活用品</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥100</span>
+                            <span>剩余: ¥100</span>
+                        </div>
+                        <div class="budget-warning" id="daily-warning">已超出预算！</div>
+                    </div>
+                    
+                    <div class="category" id="network-category">
+                        <div class="category-header">
+                            <span class="category-name">通讯网络</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥50</span>
+                            <span>剩余: ¥50</span>
+                        </div>
+                        <div class="budget-warning" id="network-warning">已超出预算！</div>
+                    </div>
+                    
+                    <div class="category" id="social-category">
+                        <div class="category-header">
+                            <span class="category-name">社交娱乐</span>
+                            <span class="category-amount">¥0</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="category-budget">
+                            <span>预算: ¥100</span>
+                            <span>剩余: ¥100</span>
+                        </div>
+                        <div class="budget-warning" id="social-warning">已超出预算！</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="transaction-form section" id="form-section">
+                <h3 class="form-title"><i class="fas fa-plus-circle"></i> 添加新记录</h3>
+                <div class="form-group">
+                    <label for="description">项目描述</label>
+                    <div class="number-tip"><i class="fas fa-lightbulb"></i>1吃的 2喝的 3玩的 4用的</div>
+                    <select id="description">
+                        <option value="1">1 - 吃的</option>
+                        <option value="2">2 - 喝的</option>
+                        <option value="3">3 - 玩的</option>
+                        <option value="4">4 - 用的</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">金额 (¥)</label>
+                    <input type="number" id="amount" placeholder="输入金额" min="0.01" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="category">消费类别</label>
+                    <select id="category">
+                        <option value="餐饮伙食">餐饮伙食</option>
+                        <option value="交通出行">交通出行</option>
+                        <option value="学习用品">学习用品</option>
+                        <option value="生活用品">生活用品</option>
+                        <option value="通讯网络">通讯网络</option>
+                        <option value="社交娱乐">社交娱乐</option>
+                        <option value="其他支出">其他支出</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date">日期</label>
+                    <input type="date" id="date" value="2025-06-01">
+                </div>
+                <button id="add-transaction"><i class="fas fa-save"></i> 保存记录</button>
+                
+                <div class="storage-controls">
+                    <button id="save-data"><i class="fas fa-cloud-upload-alt"></i> 手动保存数据</button>
+                    <button id="clear-data" class="clear-btn"><i class="fas fa-trash"></i> 清除所有数据</button>
+                </div>
+            </div>
+            
+            <div class="transaction-list section" id="list-section">
+                <h3 class="list-title"><i class="fas fa-list"></i> 最近消费记录</h3>
+                <div id="transactions-container">
+                    <p class="empty-message">暂无消费记录，请添加您的第一笔消费</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 大学生月度消费记账本</p>
+            <p>智慧消费让校园生活更精彩！</p>
+        </footer>
+    </div>
+    
+    <div class="mobile-tabs">
+        <div class="tab-item active" data-target="dashboard-section">
+            <i class="fas fa-home"></i>
+            <span>总览</span>
+        </div>
+        <div class="tab-item" data-target="form-section">
+            <i class="fas fa-plus-circle"></i>
+            <span>记账</span>
+        </div>
+        <div class="tab-item" data-target="list-section">
+            <i class="fas fa-list"></i>
+            <span>记录</span>
+        </div>
+    </div>
+    
+    <script>
+        // 预算数据 - 900元预算分配
+        const budget = 900;
+        let spent = 0;
+        
+        // 分类预算数据 - 优化分配
+        const categoryBudgets = {
+            "餐饮伙食": { budget: 450, spent: 0 },
+            "交通出行": { budget: 100, spent: 0 },
+            "学习用品": { budget: 100, spent: 0 },
+            "生活用品": { budget: 100, spent: 0 },
+            "通讯网络": { budget: 50, spent: 0 },
+            "社交娱乐": { budget: 100, spent: 0 },
+            "其他支出": { budget: 100, spent: 0 }
+        };
+        
+        // 项目描述映射
+        const descriptionMap = {
+            "1": "吃的",
+            "2": "喝的",
+            "3": "玩的",
+            "4": "用的"
+        };
+        
+        // 存储所有交易记录
+        let transactions = [];
+        
+        // 移动端标签切换
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有活动标签
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                // 隐藏所有部分
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                
+                // 添加活动状态到当前标签
+                this.classList.add('active');
+                // 显示目标部分
+                document.getElementById(this.dataset.target).classList.add('active');
+                
+                // 如果是记录部分，滚动到顶部
+                if(this.dataset.target === 'list-section') {
+                    window.scrollTo(0, document.getElementById('list-section').offsetTop - 80);
+                }
+            });
+        });
+        
+        // 从本地存储加载数据
+        function loadData() {
+            const savedData = localStorage.getItem('studentBudgetAppData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                transactions = data.transactions || [];
+                spent = data.spent || 0;
+                
+                // 更新分类支出
+                for (const category in categoryBudgets) {
+                    if (data.categoryBudgets && data.categoryBudgets[category]) {
+                        categoryBudgets[category].spent = data.categoryBudgets[category].spent;
+                    }
+                }
+                
+                // 重新渲染交易记录
+                renderTransactions();
+                
+                // 更新显示
+                updateBudgetDisplay();
+                updateCategoryDisplay();
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            const data = {
+                transactions: transactions,
+                spent: spent,
+                categoryBudgets: categoryBudgets
+            };
+            localStorage.setItem('studentBudgetAppData', JSON.stringify(data));
+            showNotification('数据已成功保存！', 'success');
+        }
+        
+        // 显示通知
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // 3秒后隐藏并移除通知
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 清除所有数据
+        function clearData() {
+            if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                transactions = [];
+                spent = 0;
+                
+                // 重置分类支出
+                for (const category in categoryBudgets) {
+                    categoryBudgets[category].spent = 0;
+                }
+                
+                // 更新显示
+                updateBudgetDisplay();
+                updateCategoryDisplay();
+                document.getElementById('transactions-container').innerHTML = '<p class="empty-message">暂无消费记录，请添加您的第一笔消费</p>';
+                
+                // 清除本地存储
+                localStorage.removeItem('studentBudgetAppData');
+                showNotification('所有数据已清除！', 'success');
+            }
+        }
+        
+        // 更新预算显示
+        function updateBudgetDisplay() {
+            const progress = (spent / budget) * 100;
+            const progressBar = document.getElementById('budget-progress');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `¥${spent.toFixed(2)} / ¥${budget}`;
+            document.getElementById('spent-amount').textContent = `¥${spent.toFixed(2)}`;
+            document.getElementById('remaining-amount').textContent = `¥${(budget - spent).toFixed(2)}`;
+            
+            // 更新预算状态
+            const statusElement = document.getElementById('budget-status');
+            if (spent < budget * 0.5) {
+                statusElement.textContent = "良好";
+                statusElement.className = "budget-status safe";
+            } else if (spent < budget * 0.8) {
+                statusElement.textContent = "注意";
+                statusElement.className = "budget-status warning";
+            } else {
+                statusElement.textContent = "超支";
+                statusElement.className = "budget-status danger";
+            }
+            
+            // 更新天数
+            const startDate = new Date('2025-06-01');
+            const today = new Date();
+            const diffTime = Math.abs(today - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('days-passed').textContent = `${diffDays}/30`;
+        }
+        
+        // 更新分类统计显示
+        function updateCategoryDisplay() {
+            for (const category in categoryBudgets) {
+                const data = categoryBudgets[category];
+                const progress = (data.spent / data.budget) * 100;
+                
+                // 获取对应的DOM元素
+                let categoryElement;
+                let warningElement;
+                
+                switch(category) {
+                    case "餐饮伙食":
+                        categoryElement = document.getElementById('food-category');
+                        warningElement = document.getElementById('food-warning');
+                        break;
+                    case "交通出行":
+                        categoryElement = document.getElementById('transport-category');
+                        warningElement = document.getElementById('transport-warning');
+                        break;
+                    case "学习用品":
+                        categoryElement = document.getElementById('study-category');
+                        warningElement = document.getElementById('study-warning');
+                        break;
+                    case "生活用品":
+                        categoryElement = document.getElementById('daily-category');
+                        warningElement = document.getElementById('daily-warning');
+                        break;
+                    case "通讯网络":
+                        categoryElement = document.getElementById('network-category');
+                        warningElement = document.getElementById('network-warning');
+                        break;
+                    case "社交娱乐":
+                        categoryElement = document.getElementById('social-category');
+                        warningElement = document.getElementById('social-warning');
+                        break;
+                }
+                
+                if (categoryElement) {
+                    // 更新金额显示
+                    categoryElement.querySelector('.category-amount').textContent = `¥${data.spent.toFixed(2)}`;
+                    
+                    // 更新进度条
+                    categoryElement.querySelector('.category-progress-bar').style.width = `${progress}%`;
+                    
+                    // 更新剩余预算
+                    categoryElement.querySelector('.category-budget span:last-child').textContent = `剩余: ¥${(data.budget - data.spent).toFixed(2)}`;
+                    
+                    // 显示或隐藏预算警告
+                    if (warningElement) {
+                        if (data.spent > data.budget) {
+                            warningElement.style.display = 'block';
+                        } else {
+                            warningElement.style.display = 'none';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 渲染交易记录
+        function renderTransactions() {
+            const container = document.getElementById('transactions-container');
+            container.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<p class="empty-message">暂无消费记录，请添加您的第一笔消费</p>';
+                return;
+            }
+            
+            // 按日期倒序排序（最新的在最前面）
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            transactions.forEach(transaction => {
+                const transactionItem = document.createElement('div');
+                transactionItem.className = 'transaction-item';
+                transactionItem.dataset.id = transaction.id;
+                
+                // 格式化日期
+                const dateObj = new Date(transaction.date);
+                const formattedDate = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
+                
+                transactionItem.innerHTML = `
+                    <div class="transaction-details">
+                        <div class="transaction-title">${transaction.description}</div>
+                        <div>
+                            <span class="transaction-category">${transaction.category}</span>
+                            <span class="transaction-date">${formattedDate}</span>
+                        </div>
+                    </div>
+                    <div class="transaction-amount expense">-¥${transaction.amount.toFixed(2)}</div>
+                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                `;
+                
+                container.appendChild(transactionItem);
+                
+                // 添加删除事件
+                transactionItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    deleteTransaction(transaction.id);
+                });
+            });
+        }
+        
+        // 删除交易记录
+        function deleteTransaction(id) {
+            const index = transactions.findIndex(t => t.id === id);
+            if (index !== -1) {
+                const transaction = transactions[index];
+                
+                // 更新总支出
+                spent -= transaction.amount;
+                
+                // 更新分类支出
+                if (categoryBudgets[transaction.category]) {
+                    categoryBudgets[transaction.category].spent -= transaction.amount;
+                }
+                
+                // 从数组中删除
+                transactions.splice(index, 1);
+                
+                // 更新显示
+                updateBudgetDisplay();
+                updateCategoryDisplay();
+                renderTransactions();
+                
+                // 保存数据
+                saveData();
+            }
+        }
+        
+        // 添加新交易
+        document.getElementById('add-transaction').addEventListener('click', function() {
+            const descriptionValue = document.getElementById('description').value;
+            const description = descriptionMap[descriptionValue] || descriptionValue;
+            const amountInput = document.getElementById('amount').value;
+            const amount = parseFloat(amountInput);
+            const category = document.getElementById('category').value;
+            const date = document.getElementById('date').value;
+            
+            if (!description || !amountInput) {
+                showNotification('请填写完整信息！', 'error');
+                return;
+            }
+            
+            if (isNaN(amount)) {
+                showNotification('请输入有效的金额！', 'error');
+                return;
+            }
+            
+            // 创建交易对象
+            const transaction = {
+                id: Date.now(), // 唯一ID
+                description: description,
+                amount: amount,
+                category: category,
+                date: date
+            };
+            
+            // 添加到交易数组
+            transactions.push(transaction);
+            
+            // 更新总支出
+            spent += amount;
+            updateBudgetDisplay();
+            
+            // 更新分类支出
+            if (categoryBudgets[category]) {
+                categoryBudgets[category].spent += amount;
+                updateCategoryDisplay();
+            }
+            
+            // 重新渲染交易记录
+            renderTransactions();
+            
+            // 保存数据
+            saveData();
+            
+            // 重置表单
+            document.getElementById('description').value = "1";
+            document.getElementById('amount').value = '';
+            
+            // 显示成功消息
+            showNotification('记录添加成功！', 'success');
+            
+            // 切换到记录页面
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelector('.tab-item[data-target="list-section"]').classList.add('active');
+            document.getElementById('list-section').classList.add('active');
+        });
+        
+        // 手动保存数据
+        document.getElementById('save-data').addEventListener('click', saveData);
+        
+        // 清除所有数据
+        document.getElementById('clear-data').addEventListener('click', clearData);
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置日期为2025年6月1日
+            document.getElementById('date').value = '2025-06-01';
+            
+            // 从本地存储加载数据
+            loadData();
+            
+            // 更新显示
+            updateBudgetDisplay();
+            updateCategoryDisplay();
+        });
+    </script>
+</body>
+</html>
